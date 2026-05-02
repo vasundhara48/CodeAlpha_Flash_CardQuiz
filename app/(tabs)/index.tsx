@@ -1,98 +1,202 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import React, { useState } from 'react';
+import {
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const [cards, setCards] = useState([
+    { question: 'What is HTML?', answer: 'HyperText Markup Language' },
+    { question: 'What is CSS?', answer: 'Used for Styling Web Pages' },
+    { question: 'What is JavaScript?', answer: 'Programming Language' },
+  ]);
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  const [index, setIndex] = useState(0);
+  const [show, setShow] = useState(false);
+
+  const [question, setQuestion] = useState('');
+  const [answer, setAnswer] = useState('');
+
+  const nextCard = () => {
+    if (index < cards.length - 1) {
+      setIndex(index + 1);
+      setShow(false);
+    }
+  };
+
+  const prevCard = () => {
+    if (index > 0) {
+      setIndex(index - 1);
+      setShow(false);
+    }
+  };
+
+  const addCard = () => {
+    if (question && answer) {
+      setCards([...cards, { question, answer }]);
+      setQuestion('');
+      setAnswer('');
+    }
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.heading}>Flashcard Quiz</Text>
+
+      <View style={styles.card}>
+        <Text style={styles.cardNo}>
+          Card {index + 1} / {cards.length}
+        </Text>
+
+        <Text style={styles.question}>
+          {cards[index].question}
+        </Text>
+
+        {show && (
+          <Text style={styles.answer}>
+            {cards[index].answer}
+          </Text>
+        )}
+
+        <TouchableOpacity
+          style={styles.showBtn}
+          onPress={() => setShow(!show)}
+        >
+          <Text style={styles.btnText}>
+            {show ? 'Hide Answer' : 'Show Answer'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.row}>
+        <TouchableOpacity style={styles.navBtn} onPress={prevCard}>
+          <Text style={styles.btnText}>Previous</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.navBtn} onPress={nextCard}>
+          <Text style={styles.btnText}>Next</Text>
+        </TouchableOpacity>
+      </View>
+
+      <Text style={styles.subHeading}>Add New Flashcard</Text>
+
+      <TextInput
+        placeholder="Enter Question"
+        placeholderTextColor="#999"
+        style={styles.input}
+        value={question}
+        onChangeText={setQuestion}
+      />
+
+      <TextInput
+        placeholder="Enter Answer"
+        placeholderTextColor="#999"
+        style={styles.input}
+        value={answer}
+        onChangeText={setAnswer}
+      />
+
+      <TouchableOpacity style={styles.addBtn} onPress={addCard}>
+        <Text style={styles.btnText}>Add Flashcard</Text>
+      </TouchableOpacity>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  container: {
+    flex: 1,
+    backgroundColor: '#0f172a',
+    padding: 20,
+  },
+
+  heading: {
+    fontSize: 30,
+    color: '#fff',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 20,
+    marginBottom: 25,
+  },
+
+  card: {
+    backgroundColor: '#1e293b',
+    padding: 25,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+  },
+
+  cardNo: {
+    color: '#94a3b8',
+    marginBottom: 10,
+    fontSize: 14,
+  },
+
+  question: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 15,
+  },
+
+  answer: {
+    color: '#38bdf8',
+    fontSize: 20,
+    marginBottom: 15,
+  },
+
+  showBtn: {
+    backgroundColor: '#2563eb',
+    padding: 14,
+    borderRadius: 12,
     alignItems: 'center',
-    gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+
+  navBtn: {
+    backgroundColor: '#334155',
+    width: '48%',
+    padding: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+
+  subHeading: {
+    color: '#fff',
+    fontSize: 22,
+    marginTop: 30,
+    marginBottom: 15,
+    fontWeight: '600',
+  },
+
+  input: {
+    backgroundColor: '#fff',
+    padding: 14,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+
+  addBtn: {
+    backgroundColor: '#16a34a',
+    padding: 15,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 5,
+  },
+
+  btnText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });
